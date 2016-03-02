@@ -40,7 +40,14 @@ public class MainActivity extends ActionBarActivity {
                 name = editTextName.getText().toString();
                 email = editTextEmail.getText().toString();
                 mobile = editTextMobile.getText().toString();
-                new SendingData(getApplicationContext()).execute(name,email,mobile);
+               SendingData sendingData =  new SendingData(new CallBackMethod() {
+                   @Override
+                   public void onTaskComplete(String result) {
+                       //Toast.makeText(getApplicationContext(),"Record successfully inserted",Toast.LENGTH_SHORT).show();
+                       textViewResponse.setText(result);
+                   }
+               });
+                       sendingData.execute(name,email,mobile);
             }
         });
     }
@@ -54,11 +61,10 @@ public class MainActivity extends ActionBarActivity {
     }
 }
 class SendingData extends AsyncTask<String,Integer,String>{
-    TextView textViewResponse;
-    Context context;
+   CallBackMethod callBackMethod =null;
 
-    public SendingData(Context context) {
-        this.context = context;
+    public SendingData(CallBackMethod callBackMethod) {
+      this.callBackMethod = callBackMethod;
     }
 
     @Override
@@ -82,7 +88,6 @@ class SendingData extends AsyncTask<String,Integer,String>{
             httpPost.setEntity(new UrlEncodedFormEntity(list));
             HttpResponse httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity());
-            Toast.makeText(context,result,Toast.LENGTH_SHORT).show();
             return result;
         }
         catch(Exception e)
@@ -92,9 +97,9 @@ class SendingData extends AsyncTask<String,Integer,String>{
         return result;
     }
 
-   /* @Override
+    @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        textViewResponse.setText(s);
-    }*/
+       callBackMethod.onTaskComplete(s);
+    }
 }
