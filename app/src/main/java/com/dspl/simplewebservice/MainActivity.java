@@ -1,15 +1,13 @@
 package com.dspl.simplewebservice;
 
-import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -25,7 +23,7 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
     EditText editTextName,editTextEmail,editTextMobile;
-    Button buttonSend;
+    Button buttonSend,buttonFetch;
     String name,email,mobile;
     TextView textViewResponse;
 
@@ -40,14 +38,20 @@ public class MainActivity extends ActionBarActivity {
                 name = editTextName.getText().toString();
                 email = editTextEmail.getText().toString();
                 mobile = editTextMobile.getText().toString();
-               SendingData sendingData =  new SendingData(new CallBackMethod() {
-                   @Override
-                   public void onTaskComplete(String result) {
-                       //Toast.makeText(getApplicationContext(),"Record successfully inserted",Toast.LENGTH_SHORT).show();
-                       textViewResponse.setText(result);
-                   }
-               });
-                       sendingData.execute(name,email,mobile);
+                SendingData sendingData = new SendingData(new CallBackMethod() {
+                    @Override
+                    public void onTaskComplete(String result) {
+                        textViewResponse.setText(result);
+                    }
+                });
+                sendingData.execute(name, email, mobile);
+            }
+        });
+        buttonFetch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,ShowingFetchingData.class);
+                startActivity(intent);
             }
         });
     }
@@ -58,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
         editTextMobile = (EditText)this.findViewById(R.id.edit_text_mobile);
         buttonSend = (Button)findViewById(R.id.button_send);
         textViewResponse = (TextView)this.findViewById(R.id.text_view_response);
+        buttonFetch = (Button)this.findViewById(R.id.button_fetch);
     }
 }
 class SendingData extends AsyncTask<String,Integer,String>{
@@ -80,11 +85,13 @@ class SendingData extends AsyncTask<String,Integer,String>{
         try
         {
             HttpClient httpClient=new DefaultHttpClient();
-            HttpPost httpPost=new HttpPost("http://10.0.0.5:85/chandan/insert.php");
+            HttpPost httpPost=new HttpPost("http://10.0.0.8:85/chandan/insert.php");
+
             List<NameValuePair> list=new ArrayList<NameValuePair>();
             list.add(new BasicNameValuePair("name", values[0]));
             list.add(new BasicNameValuePair("email", values[1]));
             list.add(new BasicNameValuePair("mobile", values[2]));
+
             httpPost.setEntity(new UrlEncodedFormEntity(list));
             HttpResponse httpResponse = httpClient.execute(httpPost);
             result = EntityUtils.toString(httpResponse.getEntity());
